@@ -8,4 +8,4 @@ spec:
   lifecycle: experimental
   owner: marks-team
   definition: 
-		$text: ./open-api.yaml
+    $text: ./open-api.yaml
