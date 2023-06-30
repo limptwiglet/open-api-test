@@ -7,4 +7,5 @@ spec:
   type: openapi
   lifecycle: experimental
   owner: marks-team
-  definition: ./open-api.yaml
+  definition: 
+		$text: ./open-api.yaml
