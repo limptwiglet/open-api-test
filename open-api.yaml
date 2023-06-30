@@ -1,315 +1,671 @@
-swagger: "2.0"
-schemes:
-  - https
-  - http
-host: api.funtranslations.com
+openapi: 3.0.0
+servers:
+  - url: https://6-dot-authentiqio.appspot.com
 info:
   contact:
-    name: Fun Translations
-    url: http://funtranslations.com/
-    x-twitter: funtranslate
-  description: |
-    Funtranslations Starwars API gives access to the full set of starwars language translations available at funtranslations.com so that you can integrate them in your workflow or an app. [Click here to get details and subscribe](http://funtranslations.com/api/starwars) .      
-
-      You can also subscribe to individual translators. Here are the details.
-      
-      Ever wonder how to talk like Yoda? Well, use our API and let your APP/webpage speak like Yoda too.[Click here to subscribe](http://funtranslations.com/api/yoda)  
-      
-      Sith Translator API. [Click here to subscribe](http://funtranslations.com/api/sith) 
-      
-      Cheunh Translator API. [Click here to subscribe](http://funtranslations.com/api/cheunh) 
-      
-      Huttese Translator API. [Click here to subscribe](http://funtranslations.com/api/huttese)
-      
-      Mandalorian Translator API. [Click here to subscribe](http://funtranslations.com/api/mandalorian)
-      
-      Gungan Translator API. [Click here to subscribe](http://funtranslations.com/api/gungan)
-  termsOfService: https://funtranslations.com/terms
-  title: Starwars Translations API
-  version: "2.3"
+    email: hello@authentiq.com
+    name: Authentiq team
+    url: http://authentiq.io/support
+  description: Strong authentication, without the passwords.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://authentiq.com/terms/
+  title: Authentiq API
+  version: "6"
   x-apisguru-categories:
-    - text
+    - security
   x-logo:
-    url: https://api.apis.guru/v2/cache/logo/https_twitter.com_funtranslate_profile_image.png
+    backgroundColor: "#F26641"
+    url: https://api.apis.guru/v2/cache/logo/https_www.authentiq.com_theme_images_authentiq-logo-a-inverse.svg
   x-origin:
-    - format: swagger
-      url: https://funtranslations.com/yaml/funtranslations.starwars.yaml
-      version: "2.0"
-  x-providerName: funtranslations.com
-  x-serviceName: starwars
-consumes:
-  - application/json
-produces:
-  - application/json
-  - application/xml
-  - application/js
-securityDefinitions:
-  X-Funtranslations-Api-Secret:
-    in: header
-    name: X-Funtranslations-Api-Secret
-    type: apiKey
-tags:
-  - description: Starwars Translation API
-    externalDocs:
-      description: Find out more
-      url: http://funtranslations.com/api/starwars
-    name: Starwars
+    - format: openapi
+      url: https://raw.githubusercontent.com/AuthentiqID/authentiq-docs/master/docs/swagger/issuer.yaml
+      version: "3.0"
+  x-providerName: 6-dot-authentiqio.appspot.com
 paths:
-  /translate/cheunh:
-    get:
-      description: Translate from English to Starwars cheunh.
+  /key:
+    delete:
+      description: |
+        Revoke an Authentiq ID using email & phone.
+
+        If called with `email` and `phone` only, a verification code 
+        will be sent by email. Do a second call adding `code` to 
+        complete the revocation.
+      operationId: key_revoke_nosecret
       parameters:
-        - description: Text to translate
-          format: string
+        - description: primary email associated to Key (ID)
           in: query
-          name: text
+          name: email
           required: true
-          type: string
-      produces:
-        - application/json
-        - application/xml
-        - application/js
+          schema:
+            type: string
+        - description: primary phone number, international representation
+          in: query
+          name: phone
+          required: true
+          schema:
+            type: string
+        - description: verification code sent by email
+          in: query
+          name: code
+          required: false
+          schema:
+            type: string
       responses:
         "200":
-          description: 200  response
-          examples:
-            application/json: |-
-              {
-                "success": {
-                  "total": 1
-                },
-                "contents": {
-                  "translated": "Ch'ah went ch'at coruscant vea was bav parsec ch'itt'suvrecah!",
-                  "text": "I went to coruscant which was ten parsec away!",
-                  "translation": "cheunh"
-                }
-              }
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    description: pending or done
+                    type: string
+                type: object
+          description: Successfully deleted
         "401":
-          description: 401  response
-          examples:
-            application/json: |-
-              {
-                  "error": {
-                      "code": 401,
-                      "message": "Unauthorized"
-                  }
-              }   
-      security:
-        - X-Funtranslations-Api-Secret: []
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Authentication error `auth-error`
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Unknown key `unknown-key`
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Confirm with code sent `confirm-first`
+        default:
+          $ref: "#/components/responses/ErrorResponse"
       tags:
-        - Starwars
-  /translate/gungan:
-    get:
-      description: Translate from English to Starwars Gungan Language.
+        - key
+        - delete
+    post:
+      description: |
+        Register a new ID `JWT(sub, devtoken)`
+
+        v5: `JWT(sub, pk, devtoken, ...)`
+
+        See: https://github.com/skion/authentiq/wiki/JWT-Examples
+      operationId: key_register
+      requestBody:
+        $ref: "#/components/requestBodies/AuthentiqID"
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                properties:
+                  secret:
+                    description: revoke key
+                    type: string
+                  status:
+                    description: registered
+                    type: string
+                type: object
+          description: Successfully registered
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Key already registered `duplicate-key`
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+      tags:
+        - key
+        - post
+  "/key/{PK}":
+    delete:
+      description: Revoke an Identity (Key) with a revocation secret
+      operationId: key_revoke
       parameters:
-        - description: Text to translate
-          format: string
+        - $ref: "#/components/parameters/PK"
+        - description: revokation secret
           in: query
-          name: text
+          name: secret
           required: true
-          type: string
-      produces:
-        - application/json
-        - application/xml
-        - application/js
+          schema:
+            type: string
       responses:
         "200":
-          description: 200  response
-          examples:
-            application/json: |-
-              {
-                "success": {
-                  "total": 1
-                },
-                "contents": {
-                  "translated": "Yousa came to mesa home and mesa said okeeday!",
-                  "text": "You came to my home and I said okay!",
-                  "translation": "gungan"
-                }
-              }
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    description: done
+                    type: string
+                type: object
+          description: Successful response
         "401":
-          description: 401  response
-          examples:
-            application/json: |-
-              {
-                  "error": {
-                      "code": 401,
-                      "message": "Unauthorized"
-                  }
-              } 
-      security:
-        - X-Funtranslations-Api-Secret: []
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Key not found / wrong code `auth-error`
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Unknown key `unknown-key`
+        default:
+          $ref: "#/components/responses/ErrorResponse"
       tags:
-        - Starwars
-  /translate/huttese:
+        - key
+        - delete
     get:
-      description: Translate from English to Starwars Huttese Language.
+      description: |
+        Get public details of an Authentiq ID.
+      operationId: key_retrieve
       parameters:
-        - description: Text to translate
-          format: string
-          in: query
-          name: text
-          required: true
-          type: string
-      produces:
-        - application/json
-        - application/xml
-        - application/js
+        - $ref: "#/components/parameters/PK"
       responses:
         "200":
-          description: 200  response
-          examples:
-            application/json: |-
-              {
-                "success": {
-                  "total": 1
-                },
-                "contents": {
-                  "translated": "Did u stuka doe murishani?",
-                  "text": "Did you see the bounty hunter?",
-                  "translation": "huttese"
-                }
-              }
-        "401":
-          description: 401  response
-          examples:
-            application/json: |-
-              {
-                  "error": {
-                      "code": 401,
-                      "message": "Unauthorized"
-                  }
-              }
-      security:
-        - X-Funtranslations-Api-Secret: []
+          content:
+            application/json:
+              schema:
+                properties:
+                  since:
+                    format: date-time
+                    type: string
+                  status:
+                    type: string
+                  sub:
+                    description: base64safe encoded public signing key
+                    type: string
+                title: JWT
+                type: object
+          description: Successfully retrieved
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Unknown key `unknown-key`
+        "410":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Key is revoked (gone). `revoked-key`
+        default:
+          $ref: "#/components/responses/ErrorResponse"
       tags:
-        - Starwars
-  /translate/mandalorian:
-    get:
-      description: Translate from English to Starwars Mandalorian Language.
+        - key
+        - get
+    head:
+      description: |
+        HEAD info on Authentiq ID
       parameters:
-        - description: Text to translate
-          format: string
-          in: query
-          name: text
-          required: true
-          type: string
-      produces:
-        - application/json
-        - application/xml
-        - application/js
+        - $ref: "#/components/parameters/PK"
       responses:
         "200":
-          description: 200  response
-          examples:
-            application/json: |-
-              {
-                "success": {
-                  "total": 1
-                },
-                "contents": {
-                  "translated": "Ni'd guuror a pint cuyir gal",
-                  "text": "I'd like a pint of ale",
-                  "translation": "mandalorian"
-                }
-              }
-        "401":
-          description: 401  response
-          examples:
-            application/json: |-
-              {
-                  "error": {
-                      "code": 401,
-                      "message": "Unauthorized"
-                  }
-              }
-      security:
-        - X-Funtranslations-Api-Secret: []
+          description: Key exists
+        "404":
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Unknown key `unknown-key`
+        "410":
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Key is revoked `revoked-key`
+        default:
+          $ref: "#/components/responses/ErrorResponse"
       tags:
-        - Starwars
-  /translate/sith:
-    get:
-      description: Translate from English to Sith Speak.
+        - key
+        - head
+    post:
+      description: |
+        update properties of an Authentiq ID.
+        (not operational in v4; use PUT for now)
+
+        v5: POST issuer-signed email & phone scopes in
+        a self-signed JWT
+
+        See: https://github.com/skion/authentiq/wiki/JWT-Examples
+      operationId: key_update
       parameters:
-        - description: Text to translate
-          format: string
-          in: query
-          name: text
-          required: true
-          type: string
-      produces:
-        - application/json
-        - application/xml
-        - application/js
+        - $ref: "#/components/parameters/PK"
+      requestBody:
+        $ref: "#/components/requestBodies/AuthentiqID"
       responses:
         "200":
-          description: 200  response
-          examples:
-            application/json: |-
-              {
-                "success": {
-                  "total": 1
-                },
-                "contents": {
-                  "translated": "Nu went kia coruscant which meo ten parsekas salini!",
-                  "text": "I went to coruscant which was ten parsec away!",
-                  "translation": "sith"
-                }
-              }
-        "401":
-          description: 401  response
-          examples:
-            application/json: |-
-              {
-                  "error": {
-                      "code": 401,
-                      "message": "Unauthorized"
-                  }
-              }
-      security:
-        - X-Funtranslations-Api-Secret: []
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    description: confirmed
+                    type: string
+                type: object
+          description: Successfully updated
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Unknown key `unknown-key`
+        default:
+          $ref: "#/components/responses/ErrorResponse"
       tags:
-        - Starwars
-  /translate/yoda:
-    get:
-      description: Translate from English to Yoda Speak.
+        - key
+        - post
+    put:
+      description: |
+        Update Authentiq ID by replacing the object.
+
+        v4: `JWT(sub,email,phone)` to bind email/phone hash; 
+
+        v5: POST issuer-signed email & phone scopes
+        and PUT to update registration `JWT(sub, pk, devtoken, ...)`
+
+        See: https://github.com/skion/authentiq/wiki/JWT-Examples
+      operationId: key_bind
       parameters:
-        - description: Text to translate
-          format: string
-          in: query
-          name: text
-          required: true
-          type: string
-      produces:
-        - application/json
-        - application/xml
-        - application/js
+        - $ref: "#/components/parameters/PK"
+      requestBody:
+        $ref: "#/components/requestBodies/AuthentiqID"
       responses:
         "200":
-          description: 200  response
-          examples:
-            application/json: |-
-              {
-                "success": {
-                  "total": 1
-                },
-                "contents": {
-                  "translated": "Lost a planet,  master obiwan has. ",
-                  "text": "Master Obiwan has lost a planet.",
-                  "translation": "yoda"
-                }
-              }
-        "401":
-          description: 401  response
-          examples:
-            application/json: |-
-              {
-                  "error": {
-                      "code": 401,
-                      "message": "Unauthorized"
-                  }
-              } 
-      security:
-        - X-Funtranslations-Api-Secret: []
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    description: confirmed
+                    type: string
+                type: object
+          description: Successfully updated
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Unknown key `unknown-key`
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Already bound to another key `duplicate-hash`
+        default:
+          $ref: "#/components/responses/ErrorResponse"
       tags:
-        - Starwars
+        - key
+        - put
+  /login:
+    post:
+      description: |
+        push sign-in request
+        See: https://github.com/skion/authentiq/wiki/JWT-Examples
+      operationId: push_login_request
+      parameters:
+        - description: URI App will connect to
+          in: query
+          name: callback
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/jwt:
+            schema:
+              $ref: "#/components/schemas/PushToken"
+        description: Push Token.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    description: sent
+                    type: string
+                type: object
+          description: Successful response
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Unauthorized for this callback audience `aud-error` or JWT should be self-signed `auth-error`
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+      tags:
+        - login
+        - post
+  /scope:
+    post:
+      description: |
+        scope verification request
+        See: https://github.com/skion/authentiq/wiki/JWT-Examples
+      operationId: sign_request
+      parameters:
+        - description: test only mode, using test issuer
+          in: query
+          name: test
+          required: false
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/jwt:
+            schema:
+              $ref: "#/components/schemas/Claims"
+        description: Claims of scope
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                properties:
+                  job:
+                    description: 20-character ID
+                    type: string
+                  status:
+                    description: waiting
+                    type: string
+                type: object
+          description: Successful response
+        "429":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Too Many Requests on same address / number `rate-limit`
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+      tags:
+        - scope
+        - post
+  "/scope/{job}":
+    delete:
+      description: delete a verification job
+      operationId: sign_delete
+      parameters:
+        - $ref: "#/components/parameters/JobID"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    description: done
+                    type: string
+                type: object
+          description: Successfully deleted
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Job not found `unknown-job`
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+      tags:
+        - scope
+        - delete
+    get:
+      description: get the status / current content of a verification job
+      operationId: sign_retrieve
+      parameters:
+        - $ref: "#/components/parameters/JobID"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                properties:
+                  exp:
+                    type: integer
+                  field:
+                    type: string
+                  sub:
+                    description: base64safe encoded public signing key
+                    type: string
+                title: JWT
+                type: object
+            application/jwt:
+              schema:
+                properties:
+                  exp:
+                    type: integer
+                  field:
+                    type: string
+                  sub:
+                    description: base64safe encoded public signing key
+                    type: string
+                title: JWT
+                type: object
+          description: Successful response (JWT)
+        "204":
+          description: Confirmed, waiting for signing
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+            application/jwt:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Job not found `unknown-job`
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+      tags:
+        - scope
+        - get
+    head:
+      description: HEAD to get the status of a verification job
+      operationId: sign_retrieve_head
+      parameters:
+        - $ref: "#/components/parameters/JobID"
+      responses:
+        "200":
+          description: Confirmed and signed
+        "204":
+          description: Confirmed, waiting for signing
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Job not found `unknown-job`
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+      tags:
+        - scope
+        - head
+    post:
+      description: this is a scope confirmation
+      operationId: sign_confirm
+      parameters:
+        - $ref: "#/components/parameters/JobID"
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    description: confirmed
+                    type: string
+                type: object
+          description: Successfully confirmed
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Confirmation error `auth-error`
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Job not found `unknown-job`
+        "405":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: JWT POSTed to scope `not-supported`
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+      tags:
+        - scope
+        - post
+    put:
+      description: |
+        authority updates a JWT with its signature
+        See: https://github.com/skion/authentiq/wiki/JWT-Examples
+      operationId: sign_update
+      parameters:
+        - $ref: "#/components/parameters/JobID"
+      responses:
+        "200":
+          content:
+            application/jwt:
+              schema:
+                properties:
+                  jwt:
+                    description: result is JWT or JSON??
+                    type: string
+                  status:
+                    description: ready
+                    type: string
+                type: object
+          description: Successfully updated
+        "404":
+          content:
+            application/jwt:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Job not found `unknown-job`
+        "409":
+          content:
+            application/jwt:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Job not confirmed yet `confirm-first`
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+      tags:
+        - scope
+        - put
+components:
+  parameters:
+    JobID:
+      description: Job ID (20 chars)
+      in: path
+      name: job
+      required: true
+      schema:
+        type: string
+    PK:
+      description: Public Signing Key - Authentiq ID (43 chars)
+      in: path
+      name: PK
+      required: true
+      schema:
+        type: string
+  requestBodies:
+    AuthentiqID:
+      content:
+        application/jwt:
+          schema:
+            $ref: "#/components/schemas/AuthentiqID"
+      description: Authentiq ID to register
+      required: true
+  responses:
+    ErrorResponse:
+      content:
+        "*/*":
+          schema:
+            $ref: "#/components/schemas/Error"
+      description: Error response
+  schemas:
+    AuthentiqID:
+      description: |
+        Authentiq ID in JWT format, self-signed.
+      properties:
+        devtoken:
+          description: device token for push messages
+          type: string
+        sub:
+          description: UUID and public signing key
+          type: string
+      required:
+        - sub
+    Claims:
+      description: |
+        Claim in JWT format, self- or issuer-signed. 
+      properties:
+        email:
+          description: ""
+          type: string
+        phone:
+          description: ""
+          type: string
+        scope:
+          description: claim scope
+          type: string
+        sub:
+          description: UUID
+          type: string
+        type:
+          description: ""
+          type: string
+      required:
+        - sub
+        - scope
+    Error:
+      properties:
+        detail:
+          type: string
+        error:
+          type: integer
+        title:
+          type: string
+        type:
+          description: unique uri for this error
+          type: string
+      required:
+        - error
+    PushToken:
+      description: |
+        PushToken in JWT format, self-signed. 
+      properties:
+        aud:
+          description: audience (URI)
+          type: string
+        exp:
+          type: integer
+        iat:
+          type: integer
+        iss:
+          description: issuer (URI)
+          type: string
+        nbf:
+          type: integer
+        sub:
+          description: UUID and public signing key
+          type: string
+      required:
+        - sub
+        - iss
+        - aud
