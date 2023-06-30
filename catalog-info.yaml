@@ -1,5 +1,8 @@
 apiVersion: backstage.io/v1beta2
 kind: API
+metadata:
+  name: star-wars-translations
+  description: API to get star wars translations
 spec:
   type: openapi
   lifecycle: experimental
