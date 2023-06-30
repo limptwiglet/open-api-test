@@ -8,4 +8,4 @@ spec:
   lifecycle: experimental
   owner: marks-team
   definition: 
-    $yaml: ./open-api.yaml
+    $yaml: https://github.com/limptwiglet/open-api-test/blob/main/open-api.yaml
