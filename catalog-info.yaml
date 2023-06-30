@@ -10,7 +10,7 @@ spec:
   definition: |
     openapi: 3.0.0
     info:
-      version: 1.0.0
+      version: 1.0.1
       title: Marks API
     servers:
       - url: http://marks.api.com
@@ -18,3 +18,5 @@ spec:
       /marks:
         get:
           summary: Get all Marks
+        post:
+          summary: Create a Mark
