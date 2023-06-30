@@ -20,3 +20,8 @@ spec:
           summary: Get all Marks
         post:
           summary: Create a Mark
+    
+      /people:
+      /people/{id}:
+        get:
+          summary: Get a Person
