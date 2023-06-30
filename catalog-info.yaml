@@ -14,6 +14,7 @@ spec:
       title: Marks API
     servers:
       - url: http://marks.api.com
+    paths:
       /marks:
         get:
           summary: Get all Marks
