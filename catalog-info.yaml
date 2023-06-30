@@ -7,5 +7,14 @@ spec:
   type: openapi
   lifecycle: experimental
   owner: marks-team
-  definition: 
-    $yaml: https://github.com/limptwiglet/open-api-test/blob/main/open-api.yaml
+  definition: |
+		openapi: "3.0.0"
+		info:
+			version: 1.0.0
+			title: Marks API
+		servers:
+			- url: http://marks.api.com
+		paths:
+			/marks:
+				get:
+					summary: Get all Marks
