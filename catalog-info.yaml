@@ -1,25 +1,9 @@
 apiVersion: backstage.io/v1alpha1
-kind: API
+kind: Location
 metadata:
   name: my-api
-  description: My test api
 spec:
-  type: openapi
-  lifecycle: experimental
-  owner: marks-team
-  definition: |
-    openapi: 3.0.0
-    info:
-      version: 1.0.1
-      title: Marks API
-    servers:
-      - url: http://marks.api.com
-    paths:
-      /marks:
-        get:
-          summary: Get all Marks
-        post:
-          summary: Create a Mark
-      /people/{id}:
-        get:
-          summary: Get a Person
+  type: url
+  targets:
+    - ./api1/catalog-info.yaml
+    - ./api2/catalog-info.yaml
