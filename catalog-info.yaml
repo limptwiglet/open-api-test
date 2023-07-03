@@ -7,3 +7,4 @@ spec:
   targets:
     - ./api1/catalog-info.yaml
     - ./api2/catalog-info.yaml
+    - ./api3/catalog-info.yaml
