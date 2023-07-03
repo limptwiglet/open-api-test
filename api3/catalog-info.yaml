@@ -1,0 +1,25 @@
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: api3
+  description: My API3
+spec:
+  type: openapi
+  lifecycle: experimental
+  owner: team3
+  definition: |
+    openapi: 3.0.0
+    info:
+      version: 1.0.1
+      title: API3
+    servers:
+      - url: http://api1.api.com
+    paths:
+      /api1:
+        get:
+          summary: Get all Marks
+        post:
+          summary: Create a Mark
+      /api1/{id}:
+        get:
+          summary: Get a Person
