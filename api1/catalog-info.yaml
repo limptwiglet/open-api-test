@@ -11,15 +11,15 @@ spec:
     openapi: 3.0.0
     info:
       version: 1.0.1
-      title: Marks API
+      title: API1
     servers:
-      - url: http://marks.api.com
+      - url: http://api1.api.com
     paths:
-      /marks:
+      /api1:
         get:
           summary: Get all Marks
         post:
           summary: Create a Mark
-      /people/{id}:
+      /api1/{id}:
         get:
           summary: Get a Person
