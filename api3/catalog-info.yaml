@@ -8,4 +8,4 @@ spec:
   lifecycle: experimental
   owner: team3
   definition:
-    $yaml: ./openapi.yaml
+    $text: ./openapi.yaml
