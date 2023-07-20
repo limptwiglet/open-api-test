@@ -2,7 +2,7 @@ apiVersion: backstage.io/v1alpha1
 kind: API
 metadata:
   name: api1
-  description: My API1
+  description: My API description has updated
 spec:
   type: openapi
   lifecycle: experimental
@@ -23,3 +23,6 @@ spec:
       /api1/{id}:
         get:
           summary: Get a Person
+      /api1/account/{id}:
+        get:
+          summary: Get a Persons account
